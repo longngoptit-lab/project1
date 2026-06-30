@@ -4,171 +4,277 @@ import {
   Text,
   TextInput,
   Pressable,
-  FlatList,
-  Alert,
   SafeAreaView,
-  StatusBar,
   ScrollView,
   StyleSheet,
-  Modal,
 } from 'react-native';
 
- 
-export default function app(){
-   const [name, setName] = useState('');
-  return(
+export default function App() {
+  const defaultColumns = ['Tên', 'Tuổi', 'Email', 'SĐT'];
 
+  const [columnName, setColumnName] = useState('');
+  const [columns, setColumns] = useState(defaultColumns);
+  const [form, setForm] = useState({});
+  const [rows, setRows] = useState([]);
+
+  const addColumn = () => {
+    const name = columnName.trim();
+    if (name === '') return;
+
+    setColumns([...columns, name]);
+    setColumnName('');
+  };
+
+  const deleteColumn = (column) => {
+    setColumns(columns.filter((item) => item !== column));
+
+    const newForm = { ...form };
+    delete newForm[column];
+    setForm(newForm);
+
+    const newRows = rows.map((row) => {
+      const newRow = { ...row };
+      delete newRow[column];
+      return newRow;
+    });
+
+    setRows(newRows);
+  };
+
+  const changeValue = (column, value) => {
+    setForm({
+      ...form,
+      [column]: value,
+    });
+  };
+
+  const saveData = () => {
+    const isEmpty = columns.every((column) => {
+      return !form[column] || form[column].trim() === '';
+    });
+
+    if (isEmpty) return;
+
+    const newRow = {};
+
+    columns.forEach((column) => {
+      newRow[column] = form[column] || '';
+    });
+
+    setRows([...rows, newRow]);
+    setForm({});
+  };
+
+  const resetDemo = () => {
+    setColumns(defaultColumns);
+    setForm({});
+    setRows([]);
+    setColumnName('');
+  };
+
+  return (
     <SafeAreaView style={styles.container}>
       <ScrollView>
-      
-      <View>
-        <Text style={{textAlign: 'center',paddingTop:50, fontSize:26}}> Quản lý bảng đơn giản giản</Text>
-        <Text style={{marginTop:1,marginBottom:20,fontSize:10, textAlign: 'center' }}> Thêm • Sửa • Xóa thuộc tính (cột) và dữ liệu (dòng)</Text>
-      </View>
-    
-      <View>
-        <Text style={{marginTop:5,marginBottom:10,fontSize:20, textAlign: 'center' }}> Bảng thuộc tính </Text>
-      </View>
-    
-    <View style={{flexDirection: 'row', margin:20}}>
-       <TextInput style={styles.an} placeholder='nhập tên của thuộc tính'/>
-       <Pressable style={({ pressed }) => ({backgroundColor: pressed ? 'green' : 'blue',padding: 10, borderRadius: 8, alignItems: 'center',})}>
-  <Text style={{ color: 'white' }}>thêm</Text>
-</Pressable>
-    </View>
-  <View style={styles.row}>
-    <Text style={styles.cell}>Tên</Text>
-    <TextInput style={styles.long} placeholder="..."/>
-    <Pressable style={styles.pressed}>
-  <Text style={{color:'blue'}}>Lưu</Text>
-</Pressable>
-  </View>
+        <Text style={styles.title}>Quản lý bảng đơn giản</Text>
 
-
-  <View style={styles.row}>
-    <Text style={styles.cell}>Tuổi</Text>
-    <TextInput style={styles.long} placeholder="..."/>
-    <Pressable style={styles.pressed}>
-  <Text style={{color:'blue'}}>Lưu</Text>
-</Pressable>
-  </View>
-
-
-  <View style={styles.row}>
-    <Text style={styles.cell}>email</Text>
-   <TextInput style={styles.long} placeholder="..."/>
-    <Pressable style={styles.pressed}>
-  <Text style={{color:'blue'}}>Lưu</Text>
-</Pressable>
-  </View>
-
-  <View style={styles.row}>
-    <Text style={styles.cell}>sdt</Text>
-    <TextInput style={styles.long} placeholder="..."/>
-    <Pressable style={styles.pressed}>
-  <Text style={{color:'blue'}}>Lưu</Text>
-</Pressable>
-  </View>
-
-  <View>
-    <Text style={{marginTop:25,marginBottom:10,fontSize:24,textAlign:'center'}}>Bảng dữ liệu</Text>
-  </View>
-  <View>
-    <View style={styles.row}> 
-      <Pressable
-       style={({pressed}) => ({padding:10,backgroundColor: pressed ? 'grey':'green',borderWidth:1,marginBottom:20,borderRadius:8})}>
-        <Text style={{fontWeight:'600',fontSize:20,color:'white'}}>
-          + thêm dòng mới
+        <Text style={styles.subtitle}>
+          Thêm • Sửa • Xóa thuộc tính và dữ liệu
         </Text>
-      </Pressable>
-    </View>
-    <View style={styles.row}>
-      <Text style={styles.hihi}> tên </Text>
-      <Text style={styles.cell}> tuổi </Text>
-      <Text style={styles.hihi}> email </Text>
-      <Text style={styles.hihi}> sdt </Text>
-      <Text style={styles.hihi}> thao tác </Text>
-    </View>
-    <View style={styles.row}>
-      <Text style={styles.hihi}> ... </Text>
-      <Text style={styles.cell}> ... </Text>
-      <Text style={styles.hihi}> ... </Text>
-      <Text style={styles.hihi}> ... </Text>
-      <Text style={styles.hihi}> sua </Text>
-    </View>
-  </View>
-  <View>
-    <Pressable style ={({pressed}) =>({backgroundColor : pressed ? 'green':'grey', flex: 1,
-    justifyContent: 'center',
-    alignSelf: 'center',width: 100,
-      borderWidth: 1,
-      padding: 10, margin:20})}>
-  <Text style={{textAlign: 'center',}}>Reset demo</Text>
-</Pressable>
-  </View>
-    </ScrollView>
+
+        <Text style={styles.sectionTitle}>Bảng thuộc tính</Text>
+
+        <View style={styles.addRow}>
+          <TextInput
+            style={styles.addInput}
+            placeholder="Nhập tên thuộc tính"
+            value={columnName}
+            onChangeText={setColumnName}
+          />
+
+          <Pressable style={styles.addButton} onPress={addColumn}>
+            <Text style={styles.buttonText}>Thêm</Text>
+          </Pressable>
+        </View>
+
+        {columns.map((column, index) => (
+          <View style={styles.row} key={index}>
+            <Text style={styles.nameCell}>{column}</Text>
+
+            <TextInput
+              style={styles.inputCell}
+              placeholder="..."
+              value={form[column] || ''}
+              onChangeText={(text) => changeValue(column, text)}
+            />
+
+            <Pressable
+              style={styles.deleteButton}
+              onPress={() => deleteColumn(column)}
+            >
+              <Text style={styles.deleteText}>Xóa</Text>
+            </Pressable>
+          </View>
+        ))}
+
+        <Pressable style={styles.saveButton} onPress={saveData}>
+          <Text style={styles.buttonText}>Lưu thông tin</Text>
+        </Pressable>
+
+        <Text style={styles.sectionTitle}>Bảng dữ liệu</Text>
+
+        <ScrollView horizontal>
+          <View>
+            <View style={styles.tableRow}>
+              {columns.map((column, index) => (
+                <Text style={styles.tableHeader} key={index}>
+                  {column}
+                </Text>
+              ))}
+            </View>
+
+            {rows.map((row, rowIndex) => (
+              <View style={styles.tableRow} key={rowIndex}>
+                {columns.map((column, columnIndex) => (
+                  <Text style={styles.tableCell} key={columnIndex}>
+                    {row[column]}
+                  </Text>
+                ))}
+              </View>
+            ))}
+          </View>
+        </ScrollView>
+
+        <Pressable style={styles.resetButton} onPress={resetDemo}>
+          <Text style={styles.resetText}>Reset demo</Text>
+        </Pressable>
+      </ScrollView>
     </SafeAreaView>
-    
   );
 }
+
 const styles = StyleSheet.create({
-  container:
-  {
-     flex:1,  
-  },
-  column:
-  {
-    flexDirection: 'column',
-    marginTop:20
-  },
-row: {
-    flexDirection: 'row',
-    marginLeft:10,
-    marginRight:10,
+  container: {
+    flex: 1,
   },
 
-  cell: {
+  title: {
+    textAlign: 'center',
+    paddingTop: 50,
+    fontSize: 26,
+    fontWeight: '600',
+  },
+
+  subtitle: {
+    marginTop: 4,
+    marginBottom: 20,
+    fontSize: 12,
+    textAlign: 'center',
+  },
+
+  sectionTitle: {
+    marginTop: 20,
+    marginBottom: 10,
+    fontSize: 22,
+    textAlign: 'center',
+    fontWeight: '600',
+  },
+
+  addRow: {
+    flexDirection: 'row',
+    marginHorizontal: 20,
+    marginBottom: 15,
+  },
+
+  addInput: {
     flex: 1,
     borderWidth: 1,
-   padding:10,
-    textAlign: 'center',
-  },
-  long:{
-    flex:4,
-    borderWidth: 1,
-  padding:10,
-    textAlign: 'center',
-  },
-  hihi:{
-    flex:2,
-    borderWidth: 1,
-  padding:10,
-    textAlign: 'center',
-  },
-  em:{padding:10,
-    textAlign: 'center',
-    borderWidth: 2,
-    marginRight:150,
-    marginLeft:150,
-    marginTop:10,
+    borderColor: 'blue',
     borderRadius: 8,
-    backgroundColor:'grey',
-    
+    padding: 10,
+    marginRight: 10,
   },
-   pressed:{
-    flex:1,
-  padding:10,
-  justifyContent:'center',
-  alignItems:'center',
-  borderWidth:1,
-},
-an:{
-   borderWidth:1,
-   flex:6,
-  padding:10,
-  marginRight:10,
-  borderRadius:10,
-  borderColor:'blue'
-   }
-,
-})
+
+  addButton: {
+    backgroundColor: 'blue',
+    paddingHorizontal: 16,
+    justifyContent: 'center',
+    borderRadius: 8,
+  },
+
+  row: {
+    flexDirection: 'row',
+    marginHorizontal: 10,
+  },
+
+  nameCell: {
+    width: 90,
+    borderWidth: 1,
+    padding: 10,
+    textAlign: 'center',
+  },
+
+  inputCell: {
+    flex: 1,
+    borderWidth: 1,
+    padding: 10,
+    textAlign: 'center',
+  },
+
+  deleteButton: {
+    width: 70,
+    borderWidth: 1,
+    padding: 10,
+    alignItems: 'center',
+  },
+
+  deleteText: {
+    color: 'red',
+    fontWeight: '600',
+  },
+
+  saveButton: {
+    backgroundColor: 'blue',
+    margin: 20,
+    padding: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+
+  buttonText: {
+    color: 'white',
+    fontWeight: '600',
+  },
+
+  tableRow: {
+    flexDirection: 'row',
+    marginHorizontal: 10,
+  },
+
+  tableHeader: {
+    width: 120,
+    borderWidth: 1,
+    padding: 10,
+    textAlign: 'center',
+    fontWeight: '600',
+  },
+
+  tableCell: {
+    width: 120,
+    borderWidth: 1,
+    padding: 10,
+    textAlign: 'center',
+  },
+
+  resetButton: {
+    backgroundColor: 'gray',
+    alignSelf: 'center',
+    width: 120,
+    padding: 10,
+    margin: 20,
+    borderWidth: 1,
+  },
+
+  resetText: {
+    textAlign: 'center',
+  },
+});
