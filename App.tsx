@@ -7,69 +7,90 @@ import {
   SafeAreaView,
   ScrollView,
   StyleSheet,
+  Modal,
+  Platform,
+  Alert,
 } from 'react-native';
 
+import DateTimePicker from '@react-native-community/datetimepicker';
+
 export default function App() {
-  const defaultColumns = ['Tên', 'Tuổi', 'Email', 'SĐT'];
+  const [modalVisible, setModalVisible] = useState(false);
 
-  const [columnName, setColumnName] = useState('');
-  const [columns, setColumns] = useState(defaultColumns);
-  const [form, setForm] = useState({});
-  const [rows, setRows] = useState([]);
+  const [ten, setTen] = useState('');
+  const [tuoi, setTuoi] = useState('');
+  const [birthday, setBirthday] = useState(new Date());
+  const [sdt, setSdt] = useState('');
+  const [email, setEmail] = useState('');
 
-  const addColumn = () => {
-    const name = columnName.trim();
-    if (name === '') return;
+  const [showDatePicker, setShowDatePicker] = useState(false);
 
-    setColumns([...columns, name]);
-    setColumnName('');
+  const [danhSach, setDanhSach] = useState([]);
+
+  const hienmodal = () => {
+    setModalVisible(true);
   };
 
-  const deleteColumn = (column) => {
-    setColumns(columns.filter((item) => item !== column));
-
-    const newForm = { ...form };
-    delete newForm[column];
-    setForm(newForm);
-
-    const newRows = rows.map((row) => {
-      const newRow = { ...row };
-      delete newRow[column];
-      return newRow;
-    });
-
-    setRows(newRows);
+  const closeModal = () => {
+    setModalVisible(false);
+    setShowDatePicker(false);
   };
 
-  const changeValue = (column, value) => {
-    setForm({
-      ...form,
-      [column]: value,
-    });
+  const formatDate = (date) => {
+    const ngay = date.getDate().toString().padStart(2, '0');
+    const thang = (date.getMonth() + 1).toString().padStart(2, '0');
+    const nam = date.getFullYear();
+
+    return `${ngay}/${thang}/${nam}`;
   };
 
-  const saveData = () => {
-    const isEmpty = columns.every((column) => {
-      return !form[column] || form[column].trim() === '';
+  const onChangeDate = (event, selectedDate) => {
+    setShowDatePicker(false);
+
+    if (selectedDate) {
+      setBirthday(selectedDate);
+    }
+  };
+
+  const resetForm = () => {
+    setTen('');
+    setTuoi('');
+    setBirthday(new Date());
+    setSdt('');
+    setEmail('');
+  };
+
+  const luuThongTin = () => {
+    if (ten.trim() === '') {
+      Alert.alert('Thông báo', 'Bạn chưa nhập tên');
+      return;
+    }
+
+    const nguoiMoi = {
+      id: Date.now().toString(),
+      ten: ten,
+      tuoi: tuoi,
+      ngaySinh: formatDate(birthday),
+      sdt: sdt,
+      email: email,
+    };
+
+    setDanhSach((danhSachCu) => {
+      return [...danhSachCu, nguoiMoi];
     });
 
-    if (isEmpty) return;
+    resetForm();
+    closeModal();
+  };
 
-    const newRow = {};
-
-    columns.forEach((column) => {
-      newRow[column] = form[column] || '';
+  const xoaThongTin = (id) => {
+    setDanhSach((danhSachCu) => {
+      return danhSachCu.filter((item) => item.id !== id);
     });
-
-    setRows([...rows, newRow]);
-    setForm({});
   };
 
   const resetDemo = () => {
-    setColumns(defaultColumns);
-    setForm({});
-    setRows([]);
-    setColumnName('');
+    setDanhSach([]);
   };
 
   return (
@@ -81,72 +102,159 @@ export default function App() {
           Thêm • Sửa • Xóa thuộc tính và dữ liệu
         </Text>
 
-        <Text style={styles.sectionTitle}>Bảng thuộc tính</Text>
+        <Text style={styles.sectionTitle}>Hành Động</Text>
 
-        <View style={styles.addRow}>
-          <TextInput
-            style={styles.addInput}
-            placeholder="Nhập tên thuộc tính"
-            value={columnName}
-            onChangeText={setColumnName}
-          />
-
-          <Pressable style={styles.addButton} onPress={addColumn}>
-            <Text style={styles.buttonText}>Thêm</Text>
-          </Pressable>
-        </View>
-
-        {columns.map((column, index) => (
-          <View style={styles.row} key={index}>
-            <Text style={styles.nameCell}>{column}</Text>
-
-            <TextInput
-              style={styles.inputCell}
-              placeholder="..."
-              value={form[column] || ''}
-              onChangeText={(text) => changeValue(column, text)}
-            />
-
+        <View style={styles.row}>
+          <View style={styles.dButton}>
             <Pressable
-              style={styles.deleteButton}
-              onPress={() => deleteColumn(column)}
+              onPress={hienmodal}
+              style={({ pressed }) => [
+                styles.mainButton,
+                { backgroundColor: pressed ? 'grey' : 'green' },
+              ]}
             >
-              <Text style={styles.deleteText}>Xóa</Text>
+              <Text style={styles.sTitle}>Thêm</Text>
             </Pressable>
           </View>
-        ))}
 
-        <Pressable style={styles.saveButton} onPress={saveData}>
-          <Text style={styles.buttonText}>Lưu thông tin</Text>
-        </Pressable>
+          <View style={styles.dButton}>
+            <Pressable
+              onPress={resetDemo}
+              style={({ pressed }) => [
+                styles.mainButton,
+                { backgroundColor: pressed ? 'grey' : 'red' },
+              ]}
+            >
+              <Text style={styles.sTitle}>Reset</Text>
+            </Pressable>
+          </View>
+        </View>
+
+        <Modal
+          visible={modalVisible}
+          transparent={true}
+          animationType="slide"
+          onRequestClose={closeModal}
+        >
+          <SafeAreaView style={styles.modalContainer}>
+            <View style={styles.modalNen}>
+              <View style={styles.modalBox}>
+                <Text style={styles.sectionTitle}>Bảng Thuộc Tính</Text>
+
+                <View style={styles.inputRow}>
+                  <Text style={styles.ttt}>Tên</Text>
+                  <TextInput
+                    style={styles.nhaptextinput}
+                    placeholder="Nhập họ và tên"
+                    value={ten}
+                    onChangeText={setTen}
+                  />
+                </View>
+
+                <View style={styles.inputRow}>
+                  <Text style={styles.ttt}>Tuổi</Text>
+                  <TextInput
+                    style={styles.nhaptextinput}
+                    placeholder="Nhập tuổi"
+                    keyboardType="numeric"
+                    value={tuoi}
+                    onChangeText={setTuoi}
+                  />
+                </View>
+
+                <View style={styles.inputRow}>
+                  <Text style={styles.ttt}>Ngày sinh</Text>
+
+                  <Pressable
+                    style={styles.dateInput}
+                    onPress={() => setShowDatePicker(true)}
+                  >
+                    <Text>{formatDate(birthday)}</Text>
+                  </Pressable>
+                </View>
+
+                {showDatePicker && (
+                  <DateTimePicker
+                    value={birthday}
+                    mode="date"
+                    display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                    onChange={onChangeDate}
+                  />
+                )}
+
+                <View style={styles.inputRow}>
+                  <Text style={styles.ttt}>SĐT</Text>
+                  <TextInput
+                    style={styles.nhaptextinput}
+                    placeholder="Nhập số điện thoại"
+                    keyboardType="phone-pad"
+                    value={sdt}
+                    onChangeText={setSdt}
+                  />
+                </View>
+
+                <View style={styles.inputRow}>
+                  <Text style={styles.ttt}>Email</Text>
+                  <TextInput
+                    style={styles.nhaptextinput}
+                    placeholder="Nhập email"
+                    keyboardType="email-address"
+                    autoCapitalize="none"
+                    value={email}
+                    onChangeText={setEmail}
+                  />
+                </View>
+
+                <View style={styles.buttonRow}>
+                  <Pressable
+                    style={({ pressed }) => [
+                      styles.saveButton,
+                      pressed && { opacity: 0.7 },
+                    ]}
+                    onPress={luuThongTin}
+                  >
+                    <Text style={styles.buttonText}>Lưu</Text>
+                  </Pressable>
+
+                  <Pressable
+                    style={({ pressed }) => [
+                      styles.closeButton,
+                      pressed && { opacity: 0.7 },
+                    ]}
+                    onPress={closeModal}
+                  >
+                    <Text style={styles.buttonText}>Đóng</Text>
+                  </Pressable>
+                </View>
+              </View>
+            </View>
+          </SafeAreaView>
+        </Modal>
 
         <Text style={styles.sectionTitle}>Bảng dữ liệu</Text>
 
-        <ScrollView horizontal>
-          <View>
-            <View style={styles.tableRow}>
-              {columns.map((column, index) => (
-                <Text style={styles.tableHeader} key={index}>
-                  {column}
-                </Text>
-              ))}
-            </View>
+        <View style={styles.card}>
+          {danhSach.length === 0 ? (
+            <Text style={styles.emptyText}>Chưa có dữ liệu</Text>
+          ) : (
+            danhSach.map((item) => (
+              <View key={item.id} style={styles.itemBox}>
+                <Text style={styles.itemText}>Tên: {item.ten}</Text>
+                <Text style={styles.itemText}>Tuổi: {item.tuoi}</Text>
+                <Text style={styles.itemText}>Ngày sinh: {item.ngaySinh}</Text>
+                <Text style={styles.itemText}>SĐT: {item.sdt}</Text>
+                <Text style={styles.itemText}>Email: {item.email}</Text>
 
-            {rows.map((row, rowIndex) => (
-              <View style={styles.tableRow} key={rowIndex}>
-                {columns.map((column, columnIndex) => (
-                  <Text style={styles.tableCell} key={columnIndex}>
-                    {row[column]}
-                  </Text>
-                ))}
+                <Pressable
+                  style={styles.deleteButton}
+                  onPress={() => xoaThongTin(item.id)}
+                >
+                  <Text style={styles.buttonText}>Xóa</Text>
+                </Pressable>
               </View>
-            ))}
-          </View>
-        </ScrollView>
-
-        <Pressable style={styles.resetButton} onPress={resetDemo}>
-          <Text style={styles.resetText}>Reset demo</Text>
-        </Pressable>
+            ))
+          )}
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
@@ -171,6 +279,10 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
 
+  row: {
+    flexDirection: 'row',
+  },
+
   sectionTitle: {
     marginTop: 20,
     marginBottom: 10,
@@ -179,102 +291,141 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
 
-  addRow: {
-    flexDirection: 'row',
-    marginHorizontal: 20,
-    marginBottom: 15,
-  },
-
-  addInput: {
+  dButton: {
     flex: 1,
-    borderWidth: 1,
-    borderColor: 'blue',
-    borderRadius: 8,
-    padding: 10,
-    marginRight: 10,
   },
 
-  addButton: {
-    backgroundColor: 'blue',
-    paddingHorizontal: 16,
-    justifyContent: 'center',
-    borderRadius: 8,
-  },
-
-  row: {
-    flexDirection: 'row',
-    marginHorizontal: 10,
-  },
-
-  nameCell: {
-    width: 90,
-    borderWidth: 1,
-    padding: 10,
-    textAlign: 'center',
-  },
-
-  inputCell: {
-    flex: 1,
-    borderWidth: 1,
-    padding: 10,
-    textAlign: 'center',
-  },
-
-  deleteButton: {
-    width: 70,
-    borderWidth: 1,
-    padding: 10,
+  mainButton: {
+    padding: 20,
     alignItems: 'center',
+    borderRadius: 10,
+    margin: 30,
   },
 
-  deleteText: {
-    color: 'red',
-    fontWeight: '600',
+  sTitle: {
+    fontSize: 15,
+    textAlign: 'center',
+    fontWeight: '500',
+    color: 'white',
+  },
+
+  modalContainer: {
+    flex: 1,
+  },
+
+  modalNen: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.5)',
+  },
+
+  modalBox: {
+    width: '85%',
+    backgroundColor: 'white',
+    borderRadius: 15,
+    padding: 20,
+  },
+
+  inputRow: {
+    flexDirection: 'row',
+    marginBottom: 10,
+  },
+
+  nhaptextinput: {
+    flex: 5,
+    borderRadius: 5,
+    padding: 10,
+    borderWidth: 2,
+  },
+
+  dateInput: {
+    flex: 5,
+    borderRadius: 5,
+    padding: 10,
+    borderWidth: 2,
+    justifyContent: 'center',
+  },
+
+  ttt: {
+    fontSize: 14,
+    flex: 1.5,
+    padding: 10,
+    borderRadius: 4,
+    backgroundColor: 'blue',
+    color: 'white',
+    marginRight: 5,
+    textAlign: 'center',
+  },
+
+  buttonRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 30,
   },
 
   saveButton: {
-    backgroundColor: 'blue',
-    margin: 20,
-    padding: 12,
+    flex: 1,
+    backgroundColor: 'green',
+    paddingVertical: 12,
     borderRadius: 8,
+    marginRight: 10,
+    alignItems: 'center',
+  },
+
+  closeButton: {
+    flex: 1,
+    backgroundColor: 'red',
+    paddingVertical: 12,
+    borderRadius: 8,
+    marginLeft: 10,
     alignItems: 'center',
   },
 
   buttonText: {
     color: 'white',
+    fontSize: 16,
     fontWeight: '600',
   },
 
-  tableRow: {
-    flexDirection: 'row',
-    marginHorizontal: 10,
-  },
-
-  tableHeader: {
-    width: 120,
-    borderWidth: 1,
-    padding: 10,
-    textAlign: 'center',
-    fontWeight: '600',
-  },
-
-  tableCell: {
-    width: 120,
-    borderWidth: 1,
-    padding: 10,
-    textAlign: 'center',
-  },
-
-  resetButton: {
-    backgroundColor: 'gray',
-    alignSelf: 'center',
-    width: 120,
-    padding: 10,
+  card: {
+    backgroundColor: 'white',
+    borderRadius: 15,
+    padding: 20,
     margin: 20,
-    borderWidth: 1,
+
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 6,
   },
 
-  resetText: {
+  emptyText: {
     textAlign: 'center',
+    fontSize: 16,
+  },
+
+  itemBox: {
+    borderBottomWidth: 1,
+    borderBottomColor: '#999',
+    paddingBottom: 15,
+    marginBottom: 15,
+  },
+
+  itemText: {
+    fontSize: 16,
+    marginBottom: 5,
+  },
+
+  deleteButton: {
+    backgroundColor: 'red',
+    paddingVertical: 10,
+    paddingHorizontal: 30,
+    borderRadius: 8,
+    alignSelf: 'center',
+    marginTop: 15,
   },
 });
