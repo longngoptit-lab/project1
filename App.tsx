@@ -13,6 +13,7 @@ import {
 } from 'react-native';
 
 import DateTimePicker from '@react-native-community/datetimepicker';
+import { Picker } from '@react-native-picker/picker';
 
 export default function App() {
   const [modalVisible, setModalVisible] = useState(false);
@@ -58,11 +59,24 @@ export default function App() {
     setBirthday(new Date());
     setSdt('');
     setEmail('');
+    setChucDanh(chucDanhList[0]);
   };
 
   const luuThongTin = () => {
     if (ten.trim() === '') {
       Alert.alert('Thông báo', 'Bạn chưa nhập tên');
+      return;
+    }
+    if (tuoi.trim() === '') {
+      Alert.alert('Thông báo', 'Bạn chưa nhập tuoi');
+      return;
+    }
+    if (sdt.trim() === '') {
+      Alert.alert('Thông báo', 'Bạn chưa nhập sdt');
+      return;
+    }
+      if (email.trim() === '') {
+      Alert.alert('Thông báo', 'Bạn chưa nhập email');
       return;
     }
 
@@ -73,6 +87,7 @@ export default function App() {
       ngaySinh: formatDate(birthday),
       sdt: sdt,
       email: email,
+      chucDanh,
     };
 
     setDanhSach((danhSachCu) => {
@@ -92,6 +107,24 @@ export default function App() {
   const resetDemo = () => {
     setDanhSach([]);
   };
+  const chucDanhList = [
+  'Giám đốc',
+  'Phó giám đốc',
+  'Trưởng phòng',
+  'Phó phòng',
+  'Trưởng nhóm',
+  'Nhân viên',
+  'Kế toán',
+  'Thủ quỹ',
+  'Hành chính nhân sự',
+  'Kinh doanh',
+  'Marketing',
+  'Kỹ thuật',
+  'Lập trình viên',
+  'Thiết kế',
+  'Thực tập sinh'
+];
+const [chucDanh, setChucDanh] = useState(chucDanhList[0]);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -204,6 +237,23 @@ export default function App() {
                     onChangeText={setEmail}
                   />
                 </View>
+                  <View style={styles.inputRow}>
+                  <Text style={styles.ttt}>Chức danh</Text>
+                  <View style={styles.pickerBox}>
+                    <Picker
+                      selectedValue={chucDanh}
+                      onValueChange={(itemValue) => setChucDanh(itemValue)}
+                    >
+                      {chucDanhList.map((item) => (
+                        <Picker.Item
+                          key={item}
+                          label={item}
+                          value={item}
+                        />
+                      ))}
+                    </Picker>
+                  </View>
+                </View> 
 
                 <View style={styles.buttonRow}>
                   <Pressable
@@ -244,7 +294,7 @@ export default function App() {
                 <Text style={styles.itemText}>Ngày sinh: {item.ngaySinh}</Text>
                 <Text style={styles.itemText}>SĐT: {item.sdt}</Text>
                 <Text style={styles.itemText}>Email: {item.email}</Text>
-
+                 <Text style={styles.itemText}>Chức danh: {item.chucDanh}</Text>
                 <Pressable
                   style={styles.deleteButton}
                   onPress={() => xoaThongTin(item.id)}
@@ -428,4 +478,10 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     marginTop: 15,
   },
+  pickerBox: {
+  flex: 5,
+  borderWidth: 2,
+  borderRadius: 5,
+  justifyContent: 'center',
+},
 });
