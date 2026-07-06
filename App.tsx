@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+
 import {
   View,
   Text,
@@ -11,7 +11,7 @@ import {
   Platform,
   Alert,
 } from 'react-native';
-
+import React, { useState, useCallback, useMemo } from 'react';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Picker } from '@react-native-picker/picker';
 
@@ -28,14 +28,33 @@ export default function App() {
 
   const [danhSach, setDanhSach] = useState([]);
 
-  const hienmodal = () => {
-    setModalVisible(true);
-  };
+    const chucDanhList = useMemo(()=>[
+  'Giám đốc',
+  'Phó giám đốc',
+  'Trưởng phòng',
+  'Phó phòng',
+  'Trưởng nhóm',
+  'Nhân viên',
+  'Kế toán',
+  'Thủ quỹ',
+  'Hành chính nhân sự',
+  'Kinh doanh',
+  'Marketing',
+  'Kỹ thuật',
+  'Lập trình viên',
+  'Thiết kế',
+  'Thực tập sinh'
+  ], []);
+const [chucDanh, setChucDanh] = useState(chucDanhList[0]);
 
-  const closeModal = () => {
+  const hienmodal = useCallback(() => {
+    setModalVisible(true);
+    }, []);
+
+  const closeModal = useCallback(() => {
     setModalVisible(false);
     setShowDatePicker(false);
-  };
+  },[]);
 
   const formatDate = (date) => {
     const ngay = date.getDate().toString().padStart(2, '0');
@@ -53,16 +72,16 @@ export default function App() {
     }
   };
 
-  const resetForm = () => {
+  const resetForm = useCallback(() => {
     setTen('');
     setTuoi('');
     setBirthday(new Date());
     setSdt('');
     setEmail('');
     setChucDanh(chucDanhList[0]);
-  };
+  },[]);
 
-  const luuThongTin = () => {
+  const luuThongTin = useCallback(() => {
     if (ten.trim() === '') {
       Alert.alert('Thông báo', 'Bạn chưa nhập tên');
       return;
@@ -96,7 +115,7 @@ export default function App() {
 
     resetForm();
     closeModal();
-  };
+  }, []);
 
   const xoaThongTin = (id) => {
     setDanhSach((danhSachCu) => {
@@ -104,27 +123,10 @@ export default function App() {
     });
   };
 
-  const resetDemo = () => {
+  const resetDemo = useCallback(() => {
     setDanhSach([]);
-  };
-  const chucDanhList = [
-  'Giám đốc',
-  'Phó giám đốc',
-  'Trưởng phòng',
-  'Phó phòng',
-  'Trưởng nhóm',
-  'Nhân viên',
-  'Kế toán',
-  'Thủ quỹ',
-  'Hành chính nhân sự',
-  'Kinh doanh',
-  'Marketing',
-  'Kỹ thuật',
-  'Lập trình viên',
-  'Thiết kế',
-  'Thực tập sinh'
-];
-const [chucDanh, setChucDanh] = useState(chucDanhList[0]);
+  }, []);
+
 
   return (
     <SafeAreaView style={styles.container}>
