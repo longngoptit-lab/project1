@@ -13,9 +13,11 @@
     "@react-native-community/datetimepicker": "^9.1.0",
     "@react-native-picker/picker": "^2.11.4",
     "@react-native/new-app-screen": "0.85.1",
+    "@reduxjs/toolkit": "^2.12.0",
     "react": "19.2.3",
     "react-native": "0.85.1",
-    "react-native-safe-area-context": "^5.5.2"
+    "react-native-safe-area-context": "^5.5.2",
+    "react-redux": "^9.3.0"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",

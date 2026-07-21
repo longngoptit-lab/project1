@@ -14,19 +14,23 @@ import {
 import React, { useState, useCallback, useMemo } from 'react';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Picker } from '@react-native-picker/picker';
+import { useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
+import { themNguoi, xoaNguoi, reset } from './store/danhSachSlice';
+import { doiCheDo } from './store/settingSlice';
 
 export default function App() {
   const [modalVisible, setModalVisible] = useState(false);
-
   const [ten, setTen] = useState('');
   const [tuoi, setTuoi] = useState('');
   const [birthday, setBirthday] = useState(new Date());
   const [sdt, setSdt] = useState('');
   const [email, setEmail] = useState('');
-
+ const dispatch = useDispatch();
+ const danhSach = useSelector(
+  (state: any) => state.danhSach.danhSach
+);
   const [showDatePicker, setShowDatePicker] = useState(false);
-
-  const [danhSach, setDanhSach] = useState([]);
 
     const chucDanhList = useMemo(()=>[
   'Giám đốc',
@@ -81,7 +85,7 @@ const [chucDanh, setChucDanh] = useState(chucDanhList[0]);
     setChucDanh(chucDanhList[0]);
   },[]);
 
-  const luuThongTin = useCallback(() => {
+  const luuThongTin = () => {
     if (ten.trim() === '') {
       Alert.alert('Thông báo', 'Bạn chưa nhập tên');
       return;
@@ -109,35 +113,58 @@ const [chucDanh, setChucDanh] = useState(chucDanhList[0]);
       chucDanh,
     };
 
-    setDanhSach((danhSachCu) => {
-      return [...danhSachCu, nguoiMoi];
-    });
+   dispatch(themNguoi(nguoiMoi));
 
     resetForm();
     closeModal();
-  }, []);
-
-  const xoaThongTin = (id) => {
-    setDanhSach((danhSachCu) => {
-      return danhSachCu.filter((item) => item.id !== id);
-    });
   };
 
-  const resetDemo = useCallback(() => {
-    setDanhSach([]);
-  }, []);
+const xoaThongTin = (id) => {
+  dispatch(xoaNguoi(id));
+};
 
+const resetDemo = useCallback(() => {
+    dispatch(reset());
+}, [dispatch]);
+const darkMode = useSelector(
+  state => state.setting.darkMode
+);
+const chuyenCheDo = () => {
+    dispatch(doiCheDo());
+};
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container,
+      {
+      backgroundColor: darkMode ? '#222' : '#fff',
+    },
+    ]}>
       <ScrollView>
-        <Text style={styles.title}>Quản lý bảng đơn giản</Text>
+        <View style={styles.row}>
+          <View style={styles.dButton}>
+            <Pressable onPress={chuyenCheDo}
+              style={({ pressed }) => [
+                styles.mainButton,
+                { backgroundColor: pressed ? 'grey' : 'blue' },
+              ]}>
+               <Text style={styles.sTitle}>Đổi chế độ</Text>
+            </Pressable>
+          </View>
+        </View>
+        
+        <Text style={[styles.title,
+          {color: darkMode ? '#fff' : '#000',}
+        ]}>Quản lý bảng đơn giản</Text>
 
-        <Text style={styles.subtitle}>
+        <Text style={[styles.subtitle,
+          {color: darkMode ? '#fff' : '#000',}
+        ]}>
           Thêm • Sửa • Xóa thuộc tính và dữ liệu
         </Text>
 
-        <Text style={styles.sectionTitle}>Hành Động</Text>
+        <Text style={[styles.sectionTitle,
+          {color: darkMode ? '#fff' : '#000',}
+        ]}>Hành Động</Text>
 
         <View style={styles.row}>
           <View style={styles.dButton}>
@@ -283,7 +310,9 @@ const [chucDanh, setChucDanh] = useState(chucDanhList[0]);
           </SafeAreaView>
         </Modal>
 
-        <Text style={styles.sectionTitle}>Bảng dữ liệu</Text>
+        <Text style={[styles.sectionTitle,
+          {color: darkMode ? '#fff' : '#000',}
+        ]}>Bảng dữ liệu</Text>
 
         <View style={styles.card}>
           {danhSach.length === 0 ? (
@@ -358,7 +387,7 @@ const styles = StyleSheet.create({
     fontSize: 15,
     textAlign: 'center',
     fontWeight: '500',
-    color: 'white',
+    color: 'white'
   },
 
   modalContainer: {
