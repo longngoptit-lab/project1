@@ -9,7 +9,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { xoaNguoi } from '../store/danhSachSlice';
 import EmployeeItem from './EmployeeItem';
 
-export default function EmployeeList() {
+export default function EmployeeList({onEdit,}) {
   const dispatch = useDispatch();
 
   const danhSach = useSelector(
@@ -39,6 +39,7 @@ export default function EmployeeList() {
                 <EmployeeItem
                     key={item.id}
                     item={item}
+                    onEdit={onEdit}
                 />
             ))
       )}

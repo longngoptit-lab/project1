@@ -18,6 +18,7 @@ import EmployeeModal from './components/EmployeeModal';
 
 export default function App() {
 const [modalVisible, setModalVisible] = useState(false);
+  const [nguoiDangSua, setNguoiDangSua] = useState(null);
   const hienmodal = useCallback(() => {
     setModalVisible(true);
     }, []);
@@ -25,6 +26,10 @@ const [modalVisible, setModalVisible] = useState(false);
   const closeModal = useCallback(() => {
   setModalVisible(false);
 }, []);
+  const suaThongTin = (nguoi) => {
+  setNguoiDangSua(nguoi);
+  setModalVisible(true);
+};
 const dispatch = useDispatch();
 
 const resetDemo = useCallback(() => {
@@ -62,7 +67,9 @@ const darkMode = useSelector(
           {color: darkMode ? '#fff' : '#000',}
         ]}>Bảng dữ liệu</Text>
 
-        <EmployeeList />
+        <EmployeeList
+         onEdit={suaThongTin}
+          />
       </ScrollView>
     </SafeAreaView>
   );

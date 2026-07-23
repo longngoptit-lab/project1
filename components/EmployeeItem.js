@@ -9,7 +9,8 @@ import {
 import { useDispatch, useSelector } from 'react-redux';
 import { xoaNguoi } from '../store/danhSachSlice';
 
-export default function EmployeeItem({ item }) {
+export default function EmployeeItem({ item,
+  onEdit }) {
   const dispatch = useDispatch();
 
   const darkMode = useSelector(
@@ -69,7 +70,14 @@ export default function EmployeeItem({ item }) {
         ]}>
         Chức danh: {item.chucDanh}
       </Text>
-
+              <Pressable
+        style={styles.editButton}
+        onPress={() => onEdit(item)}
+      >
+        <Text style={styles.buttonText}>
+          Sửa
+        </Text>
+      </Pressable>
       <Pressable
         style={styles.deleteButton}
         onPress={xoaThongTin}>
@@ -108,4 +116,12 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
   },
+  editButton: {
+  backgroundColor: 'orange',
+  paddingVertical: 10,
+  paddingHorizontal: 30,
+  borderRadius: 8,
+  alignSelf: 'center',
+  marginTop: 10,
+},
 });

@@ -21,9 +21,16 @@ const danhSachSlice = createSlice({
     reset: (state) => {
       state.danhSach=[];
     },
+    capNhatNguoi: (state, action) => {
+  state.danhSach = state.danhSach.map(item =>
+    item.id === action.payload.id
+      ? action.payload
+      : item
+  );
+},
   }
 });
 
-export const { themNguoi, xoaNguoi, reset } = danhSachSlice.actions;
+export const { themNguoi, xoaNguoi, reset, capNhatNguoi } = danhSachSlice.actions;
 
 export default danhSachSlice.reducer;
